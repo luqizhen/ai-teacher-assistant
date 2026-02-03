@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="nav.homework">Homework - Piano Teacher Management System</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
+    <header id="header"></header>
+    
+    <main>
+        <div class="container">
+            <div class="page-header">
+                <h1 data-i18n="nav.homework">Homework</h1>
+                <button onclick="location.href='/'" class="btn btn-secondary" data-i18n="nav.back">Back to Dashboard</button>
+            </div>
+            
+            <div class="homework-management">
+                <div class="homework-list-header">
+                    <h2 data-i18n="homework.list">Homework Assignments</h2>
+                    <button class="btn btn-primary" onclick="showAddHomeworkModal()" data-i18n="homework.add">Add Homework</button>
+                </div>
+                
+                <div class="filter-controls">
+                    <select id="studentFilter">
+                        <option value="">All Students</option>
+                    </select>
+                    <select id="statusFilter">
+                        <option value="">All Status</option>
+                        <option value="PENDING">Pending</option>
+                        <option value="COMPLETED">Completed</option>
+                    </select>
+                </div>
+                
+                <div id="homeworkList" class="homework-list">
+                    <!-- Homework will be loaded here via JavaScript -->
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <div id="language-selector"></div>
+    
+    <!-- Add Homework Modal -->
+    <div id="addHomeworkModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 data-i18n="homework.add">Add Homework</h3>
+                <span class="close" onclick="hideAddHomeworkModal()">&times;</span>
+            </div>
+            <form id="addHomeworkForm">
+                <div class="form-group">
+                    <label for="homeworkStudent" data-i18n="student.name">Student</label>
+                    <select id="homeworkStudent" required>
+                        <option value="">Select a student</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="homeworkTitle" data-i18n="homework.title">Title</label>
+                    <input type="text" id="homeworkTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="homeworkDescription" data-i18n="homework.description">Description</label>
+                    <textarea id="homeworkDescription" rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="homeworkDueDate" data-i18n="homework.dueDate">Due Date</label>
+                    <input type="date" id="homeworkDueDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="homeworkDifficulty" data-i18n="homework.difficulty">Difficulty</label>
+                    <select id="homeworkDifficulty" required>
+                        <option value="1">Beginner</option>
+                        <option value="2">Easy</option>
+                        <option value="3">Medium</option>
+                        <option value="4">Hard</option>
+                        <option value="5">Advanced</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" data-i18n="btn.save">Save</button>
+                    <button type="button" class="btn btn-secondary" onclick="hideAddHomeworkModal()" data-i18n="btn.cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script src="../js/main.js"></script>
+    <script>
+        // Load language selector component
+        fetch('../components/language-selector.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('language-selector').innerHTML = html;
+            })
+            .catch(error => console.error('Error loading language selector:', error));
+            
+        // Homework management functions
+        function showAddHomeworkModal() {
+            document.getElementById('addHomeworkModal').style.display = 'block';
+        }
+        
+        function hideAddHomeworkModal() {
+            document.getElementById('addHomeworkModal').style.display = 'none';
+            document.getElementById('addHomeworkForm').reset();
+        }
+        
+        // Load students for dropdown
+        async function loadStudents() {
+            try {
+                const students = await ApiHelper.get('/api/students');
+                const studentSelect = document.getElementById('homeworkStudent');
+                const filterSelect = document.getElementById('studentFilter');
+                
+                students.forEach(student => {
+                    const option = new Option(student.name, student.id);
+                    studentSelect.add(option.cloneNode(true));
+                    filterSelect.add(option);
+                });
+            } catch (error) {
+                console.error('Error loading students:', error);
+            }
+        }
+        
+        // Load homework
+        async function loadHomework() {
+            try {
+                // Since homework is part of lesson content, we'll load it from there
+                const homework = await ApiHelper.get('/api/lesson-content');
+                displayHomework(homework.filter(item => item.contentType === 'HOMEWORK'));
+            } catch (error) {
+                console.error('Error loading homework:', error);
+            }
+        }
+        
+        function displayHomework(homework) {
+            const homeworkList = document.getElementById('homeworkList');
+            homeworkList.innerHTML = '';
+            
+            homework.forEach(item => {
+                const homeworkCard = document.createElement('div');
+                homeworkCard.className = 'homework-item';
+                homeworkCard.innerHTML = `
+                    <div class="homework-info">
+                        <h3>${item.title}</h3>
+                        <p><span data-i18n="student.name">Student</span>: ${item.studentName || 'N/A'}</p>
+                        <p><span data-i18n="homework.description">Description</span>: ${item.description || 'N/A'}</p>
+                        <p><span data-i18n="homework.dueDate">Due Date</span>: ${item.dueDate || 'N/A'}</p>
+                        <p><span data-i18n="homework.difficulty">Difficulty</span>: ${item.difficultyLevel || 'N/A'}</p>
+                    </div>
+                    <div class="homework-status">
+                        <span class="status-badge ${item.completed ? 'completed' : 'pending'}">
+                            ${item.completed ? 'Completed' : 'Pending'}
+                        </span>
+                    </div>
+                    <div class="homework-actions">
+                        <button class="btn btn-sm btn-primary" onclick="editHomework(${item.id})" data-i18n="btn.edit">Edit</button>
+                        <button class="btn btn-sm btn-success" onclick="toggleHomeworkStatus(${item.id})" data-i18n="homework.toggle">Toggle Status</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteHomework(${item.id})" data-i18n="btn.delete">Delete</button>
+                    </div>
+                `;
+                homeworkList.appendChild(homeworkCard);
+            });
+        }
+        
+        // Add homework form submission
+        document.getElementById('addHomeworkForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const homeworkData = {
+                studentId: parseInt(document.getElementById('homeworkStudent').value),
+                title: document.getElementById('homeworkTitle').value,
+                description: document.getElementById('homeworkDescription').value,
+                contentType: 'HOMEWORK',
+                difficultyLevel: parseInt(document.getElementById('homeworkDifficulty').value),
+                estimatedDuration: 30, // Default 30 minutes
+                dueDate: document.getElementById('homeworkDueDate').value,
+                completed: false
+            };
+            
+            try {
+                await ApiHelper.post('/api/lesson-content', homeworkData);
+                hideAddHomeworkModal();
+                loadHomework();
+            } catch (error) {
+                console.error('Error adding homework:', error);
+            }
+        });
+        
+        // Toggle homework status
+        async function toggleHomeworkStatus(id) {
+            try {
+                // Get current homework item
+                const homework = await ApiHelper.get(`/api/lesson-content/${id}`);
+                homework.completed = !homework.completed;
+                homework.completionDate = homework.completed ? new Date().toISOString() : null;
+                
+                await ApiHelper.put(`/api/lesson-content/${id}`, homework);
+                loadHomework();
+            } catch (error) {
+                console.error('Error toggling homework status:', error);
+            }
+        }
+        
+        // Filter functionality
+        document.getElementById('studentFilter').addEventListener('change', filterHomework);
+        document.getElementById('statusFilter').addEventListener('change', filterHomework);
+        
+        function filterHomework() {
+            const studentFilter = document.getElementById('studentFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            const homeworkCards = document.querySelectorAll('.homework-item');
+            
+            homeworkCards.forEach(card => {
+                let show = true;
+                
+                if (studentFilter && !card.textContent.includes(studentFilter)) {
+                    show = false;
+                }
+                
+                if (statusFilter) {
+                    const isCompleted = card.querySelector('.status-badge.completed');
+                    if (statusFilter === 'COMPLETED' && !isCompleted) show = false;
+                    if (statusFilter === 'PENDING' && isCompleted) show = false;
+                }
+                
+                card.style.display = show ? 'block' : 'none';
+            });
+        }
+        
+        // Placeholder functions for edit and delete
+        function editHomework(id) {
+            console.log('Edit homework:', id);
+            // TODO: Implement edit functionality
+        }
+        
+        function deleteHomework(id) {
+            if (confirm('Are you sure you want to delete this homework?')) {
+                ApiHelper.delete(`/api/lesson-content/${id}`)
+                    .then(() => loadHomework())
+                    .catch(error => console.error('Error deleting homework:', error));
+            }
+        }
+        
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStudents();
+            loadHomework();
+        });
+    </script>
+</body>
+</html>

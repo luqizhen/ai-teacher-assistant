@@ -1,0 +1,155 @@
+<div class="schedule-page">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>{{ t('schedule.title') }}</h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <button class="btn btn-success" ng-click="addSchedule()">
+                <i class="bi bi-plus-circle"></i> {{ t('schedule.add') }}
+            </button>
+        </div>
+    </div>
+
+    <!-- Calendar View -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>{{ t('schedule.calendar') || 'Calendar View' }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="calendar-container">
+                        <!-- Simple calendar grid -->
+                        <div class="calendar-grid">
+                            <div class="calendar-header">
+                                <button class="btn btn-outline-secondary" ng-click="previousMonth()">
+                                    <i class="bi bi-chevron-left"></i>
+                                </button>
+                                <h5>{{ currentDate | date:'MMMM yyyy' }}</h5>
+                                <button class="btn btn-outline-secondary" ng-click="nextMonth()">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </div>
+                            <div class="calendar-weekdays">
+                                <div class="weekday">Sun</div>
+                                <div class="weekday">Mon</div>
+                                <div class="weekday">Tue</div>
+                                <div class="weekday">Wed</div>
+                                <div class="weekday">Thu</div>
+                                <div class="weekday">Fri</div>
+                                <div class="weekday">Sat</div>
+                            </div>
+                            <div class="calendar-days">
+                                <!-- Calendar days will be generated here -->
+                                <div ng-repeat="day in calendarDays" class="calendar-day" ng-class="{'today': isToday(day), 'has-events': hasEvents(day)}">
+                                    <div class="day-number">{{ day.getDate() }}</div>
+                                    <div class="day-events" ng-if="hasEvents(day)">
+                                        <small>{{ getEventsCount(day) }} events</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schedule List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>{{ t('schedule.list') || 'Schedule List' }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>{{ t('students.name') }}</th>
+                                    <th>{{ t('schedule.startTime') }}</th>
+                                    <th>{{ t('schedule.endTime') }}</th>
+                                    <th>{{ t('schedule.recurring') }}</th>
+                                    <th>{{ t('common.actions') || 'Actions' }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in schedule">
+                                    <td>{{ item.studentName }}</td>
+                                    <td>{{ item.startTime | date:'shortTime' }}</td>
+                                    <td>{{ item.endTime | date:'shortTime' }}</td>
+                                    <td>
+                                        <span class="badge" ng-class="item.recurring ? 'bg-success' : 'bg-secondary'">
+                                            {{ item.recurring ? 'Yes' : 'No' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-outline-primary" ng-click="editSchedule(item)">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" ng-click="deleteSchedule(item)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr ng-if="schedule.length === 0">
+                                    <td colspan="5" class="text-center text-muted">
+                                        {{ t('common.noResults') || 'No schedule found' }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Schedule Modal -->
+    <div class="modal fade" ng-class="{show: showAddModal}" ng-show="showAddModal" style="display: block; background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        {{ editingSchedule.id ? t('schedule.edit') : t('schedule.add') }}
+                    </h5>
+                    <button type="button" class="btn-close" ng-click="cancelModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <form ng-submit="saveSchedule()">
+                        <div class="mb-3">
+                            <label for="scheduleStudent" class="form-label">{{ t('students.name') }}</label>
+                            <select class="form-select" id="scheduleStudent" ng-model="editingSchedule.studentId" required>
+                                <option value="">Select Student</option>
+                                <option ng-repeat="student in students" value="{{ student.id }}">{{ student.name }}</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="scheduleStartTime" class="form-label">{{ t('schedule.startTime') }}</label>
+                            <input type="datetime-local" class="form-control" id="scheduleStartTime" ng-model="editingSchedule.startTime" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="scheduleEndTime" class="form-label">{{ t('schedule.endTime') }}</label>
+                            <input type="datetime-local" class="form-control" id="scheduleEndTime" ng-model="editingSchedule.endTime" required>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="scheduleRecurring" ng-model="editingSchedule.recurring">
+                                <label class="form-check-label" for="scheduleRecurring">
+                                    {{ t('schedule.recurring') }}
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" ng-click="cancelModal()">{{ t('common.cancel') }}</button>
+                    <button type="button" class="btn btn-primary" ng-click="saveSchedule()">{{ t('common.save') }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="nav.schedule">Schedule - Piano Teacher Management System</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
+    <header id="header"></header>
+    
+    <main>
+        <div class="container">
+            <div class="page-header">
+                <h1 data-i18n="nav.schedule">Schedule</h1>
+                <button onclick="location.href='/'" class="btn btn-secondary" data-i18n="nav.back">Back to Dashboard</button>
+            </div>
+            
+            <div class="schedule-management">
+                <div class="schedule-controls">
+                    <div class="calendar-nav">
+                        <button class="btn btn-secondary" onclick="previousMonth()" data-i18n="schedule.previous">Previous</button>
+                        <h2 id="currentMonth">January 2026</h2>
+                        <button class="btn btn-secondary" onclick="nextMonth()" data-i18n="schedule.next">Next</button>
+                    </div>
+                    <button class="btn btn-primary" onclick="showAddScheduleModal()" data-i18n="schedule.add">Add Schedule</button>
+                </div>
+                
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <div class="calendar-day-header" data-i18n="calendar.sun">Sun</div>
+                        <div class="calendar-day-header" data-i18n="calendar.mon">Mon</div>
+                        <div class="calendar-day-header" data-i18n="calendar.tue">Tue</div>
+                        <div class="calendar-day-header" data-i18n="calendar.wed">Wed</div>
+                        <div class="calendar-day-header" data-i18n="calendar.thu">Thu</div>
+                        <div class="calendar-day-header" data-i18n="calendar.fri">Fri</div>
+                        <div class="calendar-day-header" data-i18n="calendar.sat">Sat</div>
+                    </div>
+                    <div id="calendarGrid" class="calendar-grid">
+                        <!-- Calendar days will be generated here -->
+                    </div>
+                </div>
+                
+                <div class="schedule-suggestions">
+                    <h3 data-i18n="schedule.suggestions">Scheduling Suggestions</h3>
+                    <div class="suggestion-controls">
+                        <select id="suggestionStudent">
+                            <option value="">Select a student</option>
+                        </select>
+                        <input type="date" id="suggestionStartDate" placeholder="Start date">
+                        <input type="date" id="suggestionEndDate" placeholder="End date">
+                        <input type="number" id="suggestionDuration" placeholder="Duration (min)" min="15" max="180" value="60">
+                        <button class="btn btn-primary" onclick="getSuggestions()" data-i18n="schedule.suggestions.get">Get Suggestions</button>
+                    </div>
+                    <div id="suggestionsList" class="suggestions-list">
+                        <!-- Suggestions will be displayed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <div id="language-selector"></div>
+    
+    <!-- Add Schedule Modal -->
+    <div id="addScheduleModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 data-i18n="schedule.add">Add Schedule</h3>
+                <span class="close" onclick="hideAddScheduleModal()">&times;</span>
+            </div>
+            <form id="addScheduleForm">
+                <div class="form-group">
+                    <label for="scheduleStudent" data-i18n="student.name">Student</label>
+                    <select id="scheduleStudent" required>
+                        <option value="">Select a student</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="scheduleStartTime" data-i18n="schedule.startTime">Start Time</label>
+                    <input type="datetime-local" id="scheduleStartTime" required>
+                </div>
+                <div class="form-group">
+                    <label for="scheduleEndTime" data-i18n="schedule.endTime">End Time</label>
+                    <input type="datetime-local" id="scheduleEndTime" required>
+                </div>
+                <div class="form-group">
+                    <label for="scheduleLocation" data-i18n="schedule.location">Location</label>
+                    <input type="text" id="scheduleLocation" required>
+                </div>
+                <div class="form-group">
+                    <label for="scheduleNotes" data-i18n="schedule.notes">Notes</label>
+                    <textarea id="scheduleNotes" rows="4"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" data-i18n="btn.save">Save</button>
+                    <button type="button" class="btn btn-secondary" onclick="hideAddScheduleModal()" data-i18n="btn.cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script src="../js/main.js"></script>
+    <script>
+        // Load language selector component
+        fetch('../components/language-selector.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('language-selector').innerHTML = html;
+            })
+            .catch(error => console.error('Error loading language selector:', error));
+            
+        // Calendar state
+        let currentDate = new Date();
+        let schedules = [];
+        
+        // Schedule management functions
+        function showAddScheduleModal() {
+            document.getElementById('addScheduleModal').style.display = 'block';
+        }
+        
+        function hideAddScheduleModal() {
+            document.getElementById('addScheduleModal').style.display = 'none';
+            document.getElementById('addScheduleForm').reset();
+        }
+        
+        // Calendar functions
+        function previousMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+        }
+        
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+        }
+        
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const prevLastDay = new Date(year, month, 0);
+            
+            // Update month display
+            document.getElementById('currentMonth').textContent = 
+                firstDay.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            
+            const calendarGrid = document.getElementById('calendarGrid');
+            calendarGrid.innerHTML = '';
+            
+            // Previous month days
+            const startDay = firstDay.getDay();
+            for (let i = startDay - 1; i >= 0; i--) {
+                const day = prevLastDay.getDate() - i;
+                const dayElement = createDayElement(day, 'other-month');
+                calendarGrid.appendChild(dayElement);
+            }
+            
+            // Current month days
+            for (let day = 1; day <= lastDay.getDate(); day++) {
+                const dayElement = createDayElement(day, 'current-month');
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                dayElement.dataset.date = dateStr;
+                
+                // Add schedules for this day
+                const daySchedules = schedules.filter(schedule => 
+                    schedule.startTime.startsWith(dateStr)
+                );
+                
+                daySchedules.forEach(schedule => {
+                    const lessonElement = document.createElement('div');
+                    lessonElement.className = 'calendar-lesson';
+                    lessonElement.textContent = schedule.studentName || 'Lesson';
+                    dayElement.appendChild(lessonElement);
+                });
+                
+                calendarGrid.appendChild(dayElement);
+            }
+            
+            // Next month days
+            const endDay = lastDay.getDay();
+            for (let day = 1; day < 7 - endDay; day++) {
+                const dayElement = createDayElement(day, 'other-month');
+                calendarGrid.appendChild(dayElement);
+            }
+        }
+        
+        function createDayElement(day, monthClass) {
+            const dayElement = document.createElement('div');
+            dayElement.className = `calendar-day ${monthClass}`;
+            const dayNumber = document.createElement('div');
+            dayNumber.className = 'calendar-day-number';
+            dayNumber.textContent = day;
+            dayElement.appendChild(dayNumber);
+            return dayElement;
+        }
+        
+        // Load students for dropdowns
+        async function loadStudents() {
+            try {
+                const students = await ApiHelper.get('/api/students');
+                const scheduleSelect = document.getElementById('scheduleStudent');
+                const suggestionSelect = document.getElementById('suggestionStudent');
+                
+                students.forEach(student => {
+                    const option = new Option(student.name, student.id);
+                    scheduleSelect.add(option.cloneNode(true));
+                    suggestionSelect.add(option);
+                });
+            } catch (error) {
+                console.error('Error loading students:', error);
+            }
+        }
+        
+        // Load schedules
+        async function loadSchedules() {
+            try {
+                schedules = await ApiHelper.get('/api/schedules');
+                renderCalendar();
+            } catch (error) {
+                console.error('Error loading schedules:', error);
+            }
+        }
+        
+        // Add schedule form submission
+        document.getElementById('addScheduleForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const scheduleData = {
+                studentId: parseInt(document.getElementById('scheduleStudent').value),
+                startTime: document.getElementById('scheduleStartTime').value,
+                endTime: document.getElementById('scheduleEndTime').value,
+                location: document.getElementById('scheduleLocation').value,
+                notes: document.getElementById('scheduleNotes').value
+            };
+            
+            try {
+                await ApiHelper.post('/api/schedules', scheduleData);
+                hideAddScheduleModal();
+                loadSchedules();
+            } catch (error) {
+                console.error('Error adding schedule:', error);
+            }
+        });
+        
+        // Get scheduling suggestions
+        async function getSuggestions() {
+            const studentId = document.getElementById('suggestionStudent').value;
+            const startDate = document.getElementById('suggestionStartDate').value;
+            const endDate = document.getElementById('suggestionEndDate').value;
+            const duration = document.getElementById('suggestionDuration').value;
+            
+            if (!studentId || !startDate || !endDate || !duration) {
+                alert('Please fill in all suggestion fields');
+                return;
+            }
+            
+            try {
+                const suggestions = await ApiHelper.get(`/api/schedules/suggestions?studentId=${studentId}&startDate=${startDate}&endDate=${endDate}&duration=${duration}`);
+                displaySuggestions(suggestions);
+            } catch (error) {
+                console.error('Error getting suggestions:', error);
+            }
+        }
+        
+        function displaySuggestions(suggestions) {
+            const suggestionsList = document.getElementById('suggestionsList');
+            suggestionsList.innerHTML = '';
+            
+            suggestions.forEach(suggestion => {
+                const suggestionCard = document.createElement('div');
+                suggestionCard.className = 'suggestion-card';
+                suggestionCard.innerHTML = `
+                    <div class="suggestion-time">
+                        <strong>${suggestion.startTime} - ${suggestion.endTime}</strong>
+                    </div>
+                    <div class="suggestion-details">
+                        <p>Duration: ${suggestion.duration} minutes</p>
+                        <p>Availability: ${suggestion.availability}</p>
+                    </div>
+                    <button class="btn btn-sm btn-primary" onclick="acceptSuggestion(${JSON.stringify(suggestion).replace(/"/g, '&quot;')})">Accept</button>
+                `;
+                suggestionsList.appendChild(suggestionCard);
+            });
+        }
+        
+        function acceptSuggestion(suggestion) {
+            document.getElementById('scheduleStartTime').value = suggestion.startTime;
+            document.getElementById('scheduleEndTime').value = suggestion.endTime;
+            showAddScheduleModal();
+        }
+        
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStudents();
+            loadSchedules();
+            renderCalendar();
+        });
+    </script>
+</body>
+</html>

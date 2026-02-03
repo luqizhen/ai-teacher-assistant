@@ -1,0 +1,251 @@
+<!-- Language Selector Component -->
+<div class="language-selector">
+    <div class="dropdown">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="language-flag" id="currentLanguageFlag">🇺🇸</span>
+            <span class="language-text" id="currentLanguageText">English</span>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="languageDropdown">
+            <li>
+                <a class="dropdown-item language-option" href="#" data-lang="en">
+                    <span class="language-flag">🇺🇸</span>
+                    <span class="language-name">English</span>
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item language-option" href="#" data-lang="zh">
+                    <span class="language-flag">🇨🇳</span>
+                    <span class="language-name">中文</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<style>
+.language-selector {
+    position: relative;
+    display: inline-block;
+}
+
+.language-selector .dropdown-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #dee2e6;
+    background: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.language-selector .dropdown-toggle:hover {
+    background: #f8f9fa;
+    border-color: #adb5bd;
+}
+
+.language-flag {
+    font-size: 16px;
+    line-height: 1;
+}
+
+.language-text {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.language-selector .dropdown-menu {
+    min-width: 160px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.language-selector .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    transition: background-color 0.2s ease;
+}
+
+.language-selector .dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+.language-selector .dropdown-item.active {
+    background-color: #e3f2fd;
+    color: #1976d2;
+    font-weight: 500;
+}
+
+.language-name {
+    font-size: 14px;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .language-selector .dropdown-toggle {
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+    
+    .language-flag {
+        font-size: 14px;
+    }
+    
+    .language-text {
+        font-size: 13px;
+    }
+    
+    .language-selector .dropdown-item {
+        padding: 8px 12px;
+    }
+    
+    .language-name {
+        font-size: 13px;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .language-selector .dropdown-toggle {
+        background: #2d3748;
+        border-color: #4a5568;
+        color: #e2e8f0;
+    }
+    
+    .language-selector .dropdown-toggle:hover {
+        background: #4a5568;
+        border-color: #718096;
+    }
+    
+    .language-selector .dropdown-menu {
+        background: #2d3748;
+        border-color: #4a5568;
+    }
+    
+    .language-selector .dropdown-item {
+        color: #e2e8f0;
+    }
+    
+    .language-selector .dropdown-item:hover {
+        background-color: #4a5568;
+    }
+    
+    .language-selector .dropdown-item.active {
+        background-color: #1a365d;
+        color: #63b3ed;
+    }
+}
+</style>
+
+<script>
+// Language selector functionality
+console.log('Language selector script loaded');
+
+// Initialize immediately since DOM is already loaded
+function initializeLanguageSelector() {
+    console.log('Initializing language selector');
+    
+    const languageOptions = document.querySelectorAll('.language-option');
+    const currentLanguageFlag = document.getElementById('currentLanguageFlag');
+    const currentLanguageText = document.getElementById('currentLanguageText');
+    
+    console.log('Found language options:', languageOptions.length);
+    console.log('Found flag element:', currentLanguageFlag);
+    console.log('Found text element:', currentLanguageText);
+    
+    // Language configurations
+    const languages = {
+        en: {
+            flag: '🇺🇸',
+            name: 'English',
+            direction: 'ltr'
+        },
+        zh: {
+            flag: '🇨🇳',
+            name: '中文',
+            direction: 'ltr'
+        }
+    };
+    
+    // Get current language from localStorage or default to English
+    let currentLanguage = localStorage.getItem('preferredLanguage') || 'en';
+    console.log('Initial language from storage:', currentLanguage);
+    
+    // Update language selector display
+    function updateLanguageSelector(lang) {
+        const langConfig = languages[lang];
+        if (langConfig) {
+            currentLanguageFlag.textContent = langConfig.flag;
+            currentLanguageText.textContent = langConfig.name;
+            
+            // Update active state
+            languageOptions.forEach(option => {
+                option.classList.remove('active');
+                if (option.dataset.lang === lang) {
+                    option.classList.add('active');
+                }
+            });
+            
+            // Update document direction
+            document.documentElement.dir = langConfig.direction;
+            document.documentElement.lang = lang;
+        }
+    }
+    
+    // Handle language selection
+    languageOptions.forEach(option => {
+        option.addEventListener('click', async function(e) {
+            e.preventDefault();
+            const selectedLang = this.dataset.lang;
+            console.log('Language selector clicked:', selectedLang);
+            
+            // Save preference
+            localStorage.setItem('preferredLanguage', selectedLang);
+            
+            // Update selector
+            updateLanguageSelector(selectedLang);
+            
+            // Wait for language manager to be available, then call it
+            const waitForLanguageManager = () => {
+                return new Promise((resolve) => {
+                    const checkManager = () => {
+                        if (window.languageManager) {
+                            resolve(window.languageManager);
+                        } else {
+                            setTimeout(checkManager, 100);
+                        }
+                    };
+                    checkManager();
+                });
+            };
+            
+            try {
+                const languageManager = await waitForLanguageManager();
+                console.log('Calling languageManager.setLanguage with:', selectedLang);
+                await languageManager.setLanguage(selectedLang);
+                console.log('Language set successfully to:', selectedLang);
+            } catch (error) {
+                console.error('Error setting language:', error);
+            }
+        });
+    });
+    
+    // Initialize selector
+    updateLanguageSelector(currentLanguage);
+    
+    // Listen for language change events
+    document.addEventListener('languageChanged', function(e) {
+        console.log('Language changed to:', e.detail.language);
+        // Additional language change logic can be added here
+    });
+    
+    console.log('Language selector initialization completed');
+}
+
+// Initialize immediately
+initializeLanguageSelector();
+</script>

@@ -1,0 +1,118 @@
+<div class="homework-page">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>{{ t('homework.title') }}</h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <button class="btn btn-warning" ng-click="addHomework()">
+                <i class="bi bi-plus-circle"></i> {{ t('homework.add') }}
+            </button>
+        </div>
+    </div>
+
+    <!-- Homework List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>{{ t('homework.assignments') || 'Homework Assignments' }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>{{ t('students.name') }}</th>
+                                    <th>{{ t('homework.title') }}</th>
+                                    <th>{{ t('homework.description') }}</th>
+                                    <th>{{ t('homework.dueDate') }}</th>
+                                    <th>{{ t('common.status') || 'Status' }}</th>
+                                    <th>{{ t('common.actions') || 'Actions' }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in homework">
+                                    <td>{{ item.studentName }}</td>
+                                    <td>{{ item.title }}</td>
+                                    <td>
+                                        <small>{{ item.description | limitTo:50 }}</small>
+                                    </td>
+                                    <td>{{ item.dueDate | date:'mediumDate' }}</td>
+                                    <td>
+                                        <span class="badge" ng-class="getStatusClass(item.status)">
+                                            {{ item.status }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-outline-primary" ng-click="editHomework(item)">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" ng-click="deleteHomework(item)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr ng-if="homework.length === 0">
+                                    <td colspan="6" class="text-center text-muted">
+                                        {{ t('common.noResults') || 'No homework found' }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Homework Modal -->
+    <div class="modal fade" ng-class="{show: showAddModal}" ng-show="showAddModal" style="display: block; background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        {{ editingHomework.id ? t('homework.edit') : t('homework.add') }}
+                    </h5>
+                    <button type="button" class="btn-close" ng-click="cancelModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <form ng-submit="saveHomework()">
+                        <div class="mb-3">
+                            <label for="homeworkStudent" class="form-label">{{ t('students.name') }}</label>
+                            <select class="form-select" id="homeworkStudent" ng-model="editingHomework.studentId" required>
+                                <option value="">Select Student</option>
+                                <option ng-repeat="student in students" value="{{ student.id }}">{{ student.name }}</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="homeworkTitle" class="form-label">{{ t('homework.title') }}</label>
+                            <input type="text" class="form-control" id="homeworkTitle" ng-model="editingHomework.title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="homeworkDescription" class="form-label">{{ t('homework.description') }}</label>
+                            <textarea class="form-control" id="homeworkDescription" ng-model="editingHomework.description" rows="4" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="homeworkDueDate" class="form-label">{{ t('homework.dueDate') }}</label>
+                            <input type="date" class="form-control" id="homeworkDueDate" ng-model="editingHomework.dueDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="homeworkStatus" class="form-label">{{ t('common.status') || 'Status' }}</label>
+                            <select class="form-select" id="homeworkStatus" ng-model="editingHomework.status" required>
+                                <option value="pending">Pending</option>
+                                <option value="in-progress">In Progress</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" ng-click="cancelModal()">{{ t('common.cancel') }}</button>
+                    <button type="button" class="btn btn-primary" ng-click="saveHomework()">{{ t('common.save') }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

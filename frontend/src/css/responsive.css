@@ -1,0 +1,492 @@
+/* Responsive Design */
+
+/* Touch-friendly improvements */
+* {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+}
+
+/* Large Tablets and Small Desktops */
+@media (max-width: 1024px) {
+    .container {
+        padding: 0 15px;
+    }
+    
+    .dashboard-cards {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-row .form-group:last-child {
+        grid-column: span 1;
+    }
+    
+    .student-info {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .student-actions {
+        align-self: flex-start;
+    }
+    
+    .calendar-grid {
+        gap: 0;
+    }
+    
+    .calendar-day {
+        min-height: 80px;
+        padding: 0.3rem;
+    }
+    
+    /* Touch-friendly button sizes */
+    .btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    /* Improved touch targets */
+    .student-actions .btn {
+        margin: 4px;
+    }
+}
+
+/* Tablets */
+@media (max-width: 768px) {
+    .header-content {
+        padding: 0 15px;
+    }
+    
+    .menu-toggle {
+        display: block;
+        position: fixed;
+        top: 15px;
+        right: 15px;
+        z-index: 1000;
+        background: #3498db;
+        border: none;
+        border-radius: 4px;
+        padding: 8px;
+        cursor: pointer;
+    }
+    
+    nav ul {
+        display: none;
+        position: fixed;
+        top: 0;
+        right: -280px;
+        width: 280px;
+        height: 100vh;
+        background: white;
+        box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+        transition: right 0.3s ease;
+        z-index: 999;
+        flex-direction: column;
+        padding: 60px 20px 20px;
+    }
+    
+    nav ul.active {
+        display: flex;
+        right: 0;
+    }
+    
+    .sidebar {
+        width: 280px;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        z-index: 998;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    }
+    
+    .sidebar.active {
+        transform: translateX(0);
+    }
+    
+    .main-content {
+        margin-left: 0;
+        transition: margin-left 0.3s ease;
+    }
+    
+    .main-content.shifted {
+        margin-left: 280px;
+    }
+    
+    .dashboard-cards {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .card {
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    h1 {
+        font-size: 2rem;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+    }
+    
+    .student-list-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    .search-box input {
+        width: 100%;
+        padding: 12px;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+    
+    .calendar-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    .calendar-nav {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .calendar-nav .btn {
+        margin: 2px;
+        min-height: 40px;
+    }
+    
+    .calendar-day {
+        min-height: 60px;
+        padding: 0.2rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+    
+    .calendar-day:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .calendar-day:active {
+        background-color: #e9ecef;
+        transform: scale(0.98);
+    }
+    
+    .homework-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    .modal-content {
+        padding: 1.5rem;
+        margin: 1rem;
+        border-radius: 8px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .table {
+        font-size: 0.9rem;
+        border-collapse: collapse;
+        width: 100%;
+    }
+    
+    .table th,
+    .table td {
+        padding: 8px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+    }
+    
+    /* Mobile-specific table improvements */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Touch-friendly form elements */
+    input, select, textarea {
+        font-size: 16px; /* Prevents zoom on iOS */
+        padding: 12px;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+        transition: border-color 0.2s ease;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    }
+}
+
+/* Large Phones */
+@media (max-width: 576px) {
+    .container {
+        padding: 0 10px;
+    }
+    
+    h1 {
+        font-size: 1.8rem;
+    }
+    
+    h2 {
+        font-size: 1.3rem;
+    }
+    
+    .dashboard {
+        padding: 1rem 0;
+    }
+    
+    .card {
+        padding: 1rem;
+    }
+    
+    .btn {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+    }
+    
+    .student-form {
+        padding: 1.5rem;
+    }
+    
+    .student-card {
+        padding: 1rem;
+    }
+    
+    .student-actions {
+        flex-wrap: wrap;
+    }
+    
+    .student-actions .btn {
+        font-size: 0.7rem;
+        padding: 4px 8px;
+    }
+    
+    .calendar-day-header {
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .calendar-day {
+        min-height: 50px;
+        padding: 0.1rem;
+    }
+    
+    .calendar-day-number {
+        font-size: 0.8rem;
+    }
+    
+    .calendar-lesson {
+        font-size: 0.6rem;
+        padding: 1px 2px;
+    }
+    
+    .homework-item {
+        padding: 1rem;
+    }
+    
+    .homework-status {
+        font-size: 0.7rem;
+        padding: 3px 8px;
+    }
+    
+    .modal-content {
+        padding: 1rem;
+        margin: 0.5rem;
+        width: 95%;
+    }
+    
+    .modal-header {
+        margin-bottom: 1rem;
+    }
+    
+    .form-group {
+        margin-bottom: 0.8rem;
+    }
+    
+    input,
+    select,
+    textarea {
+        padding: 8px;
+        font-size: 0.9rem;
+    }
+    
+    .table {
+        font-size: 0.8rem;
+    }
+    
+    .table th,
+    .table td {
+        padding: 6px;
+    }
+    
+    /* Hide some table columns on very small screens */
+    .table-hide-small {
+        display: none;
+    }
+}
+
+/* Extra Small Phones */
+@media (max-width: 400px) {
+    h1 {
+        font-size: 1.5rem;
+    }
+    
+    h2 {
+        font-size: 1.2rem;
+    }
+    
+    .btn {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+        margin: 2px;
+    }
+    
+    .card {
+        padding: 0.8rem;
+    }
+    
+    .student-form {
+        padding: 1rem;
+    }
+    
+    .student-card {
+        padding: 0.8rem;
+    }
+    
+    .calendar-day {
+        min-height: 40px;
+    }
+    
+    .calendar-day-number {
+        font-size: 0.7rem;
+    }
+    
+    .calendar-lesson {
+        font-size: 0.5rem;
+        padding: 1px;
+    }
+    
+    .homework-item {
+        padding: 0.8rem;
+    }
+    
+    .modal-content {
+        padding: 0.8rem;
+    }
+    
+    input,
+    select,
+    textarea {
+        padding: 6px;
+        font-size: 0.8rem;
+    }
+    
+    .table {
+        font-size: 0.7rem;
+    }
+    
+    .table th,
+    .table td {
+        padding: 4px;
+    }
+}
+
+/* Landscape Orientation for Mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    .sidebar {
+        width: 320px;
+    }
+    
+    .calendar-day {
+        min-height: 45px;
+    }
+    
+    .dashboard-cards {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+}
+
+/* Print Styles */
+@media print {
+    header,
+    .sidebar,
+    .menu-toggle,
+    .language-selector,
+    .btn,
+    .modal {
+        display: none !important;
+    }
+    
+    body {
+        background: white !important;
+        color: black !important;
+    }
+    
+    .container {
+        max-width: none;
+        padding: 0;
+    }
+    
+    .card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+    
+    .student-card,
+    .homework-item {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+    
+    .table {
+        page-break-inside: auto;
+    }
+    
+    .modal.show {
+        display: none !important;
+    }
+}
+
+/* High DPI Displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .calendar-lesson {
+        border: 0.5px solid #2980b9;
+    }
+    
+    .btn {
+        border-width: 0.5px;
+    }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Dark Mode Support (if needed in future) */
+@media (prefers-color-scheme: dark) {
+    /* Can be implemented later if dark mode is desired */
+}

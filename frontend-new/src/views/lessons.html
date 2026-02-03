@@ -1,0 +1,118 @@
+<div class="lessons-page">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>{{ t('lessons.title') }}</h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <button class="btn btn-info" ng-click="addLesson()">
+                <i class="bi bi-plus-circle"></i> {{ t('lessons.add') }}
+            </button>
+        </div>
+    </div>
+
+    <!-- Lessons List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>{{ t('lessons.history') || 'Lesson History' }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>{{ t('students.name') }}</th>
+                                    <th>{{ t('lessons.date') }}</th>
+                                    <th>{{ t('lessons.duration') }}</th>
+                                    <th>{{ t('lessons.difficulty') }}</th>
+                                    <th>{{ t('lessons.notes') }}</th>
+                                    <th>{{ t('common.actions') || 'Actions' }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="lesson in lessons">
+                                    <td>{{ lesson.studentName }}</td>
+                                    <td>{{ lesson.date | date:'mediumDate' }}</td>
+                                    <td>{{ lesson.duration }} min</td>
+                                    <td>
+                                        <span class="badge" ng-class="getDifficultyClass(lesson.difficulty)">
+                                            {{ lesson.difficulty }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small>{{ lesson.notes | limitTo:50 }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-outline-primary" ng-click="editLesson(lesson)">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" ng-click="deleteLesson(lesson)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr ng-if="lessons.length === 0">
+                                    <td colspan="6" class="text-center text-muted">
+                                        {{ t('common.noResults') || 'No lessons found' }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Lesson Modal -->
+    <div class="modal fade" ng-class="{show: showAddModal}" ng-show="showAddModal" style="display: block; background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        {{ editingLesson.id ? t('lessons.edit') : t('lessons.add') }}
+                    </h5>
+                    <button type="button" class="btn-close" ng-click="cancelModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <form ng-submit="saveLesson()">
+                        <div class="mb-3">
+                            <label for="lessonStudent" class="form-label">{{ t('students.name') }}</label>
+                            <select class="form-select" id="lessonStudent" ng-model="editingLesson.studentId" required>
+                                <option value="">Select Student</option>
+                                <option ng-repeat="student in students" value="{{ student.id }}">{{ student.name }}</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="lessonDate" class="form-label">{{ t('lessons.date') }}</label>
+                            <input type="datetime-local" class="form-control" id="lessonDate" ng-model="editingLesson.date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="lessonDuration" class="form-label">{{ t('lessons.duration') }}</label>
+                            <input type="number" class="form-control" id="lessonDuration" ng-model="editingLesson.duration" min="15" step="15" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="lessonDifficulty" class="form-label">{{ t('lessons.difficulty') }}</label>
+                            <select class="form-select" id="lessonDifficulty" ng-model="editingLesson.difficulty" required>
+                                <option value="beginner">Beginner</option>
+                                <option value="intermediate">Intermediate</option>
+                                <option value="advanced">Advanced</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="lessonNotes" class="form-label">{{ t('lessons.notes') }}</label>
+                            <textarea class="form-control" id="lessonNotes" ng-model="editingLesson.notes" rows="4"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" ng-click="cancelModal()">{{ t('common.cancel') }}</button>
+                    <button type="button" class="btn btn-primary" ng-click="saveLesson()">{{ t('common.save') }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

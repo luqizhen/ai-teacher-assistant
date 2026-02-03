@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="nav.students">Students - Piano Teacher Management System</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
+    <header id="header"></header>
+    
+    <main>
+        <div class="container">
+            <div class="page-header">
+                <h1 data-i18n="nav.students">Students</h1>
+                <button onclick="location.href='/'" class="btn btn-secondary" data-i18n="nav.back">Back to Dashboard</button>
+            </div>
+            
+            <div class="student-management">
+                <div class="student-list-header">
+                    <h2 data-i18n="student.list">Student List</h2>
+                    <button class="btn btn-primary" onclick="showAddStudentModal()" data-i18n="student.add">Add Student</button>
+                </div>
+                
+                <div class="search-box">
+                    <input type="text" id="studentSearch" placeholder="Search students..." data-i18n-placeholder="student.search">
+                </div>
+                
+                <div id="studentList" class="student-list">
+                    <!-- Students will be loaded here via JavaScript -->
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <div id="language-selector"></div>
+    
+    <!-- Add Student Modal -->
+    <div id="addStudentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 data-i18n="student.add">Add Student</h3>
+                <span class="close" onclick="hideAddStudentModal()">&times;</span>
+            </div>
+            <form id="addStudentForm">
+                <div class="form-group">
+                    <label for="studentName" data-i18n="student.name">Name</label>
+                    <input type="text" id="studentName" required>
+                </div>
+                <div class="form-group">
+                    <label for="studentAge" data-i18n="student.age">Age</label>
+                    <input type="number" id="studentAge" required min="5" max="100">
+                </div>
+                <div class="form-group">
+                    <label for="studentEmail" data-i18n="student.email">Email</label>
+                    <input type="email" id="studentEmail">
+                </div>
+                <div class="form-group">
+                    <label for="studentPhone" data-i18n="student.phone">Phone</label>
+                    <input type="tel" id="studentPhone">
+                </div>
+                <div class="form-group">
+                    <label for="studentGrade" data-i18n="student.grade">Grade</label>
+                    <input type="text" id="studentGrade">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" data-i18n="btn.save">Save</button>
+                    <button type="button" class="btn btn-secondary" onclick="hideAddStudentModal()" data-i18n="btn.cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script src="../js/main.js"></script>
+    <script>
+        // Load language selector component
+        fetch('../components/language-selector.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('language-selector').innerHTML = html;
+            })
+            .catch(error => console.error('Error loading language selector:', error));
+            
+        // Student management functions
+        function showAddStudentModal() {
+            document.getElementById('addStudentModal').style.display = 'block';
+        }
+        
+        function hideAddStudentModal() {
+            document.getElementById('addStudentModal').style.display = 'none';
+            document.getElementById('addStudentForm').reset();
+        }
+        
+        // Load students
+        async function loadStudents() {
+            try {
+                const students = await ApiHelper.get('/api/students');
+                displayStudents(students);
+            } catch (error) {
+                console.error('Error loading students:', error);
+            }
+        }
+        
+        function displayStudents(students) {
+            const studentList = document.getElementById('studentList');
+            studentList.innerHTML = '';
+            
+            students.forEach(student => {
+                const studentCard = document.createElement('div');
+                studentCard.className = 'student-card';
+                studentCard.innerHTML = `
+                    <div class="student-info">
+                        <h3>${student.name}</h3>
+                        <p><span data-i18n="student.age">Age</span>: ${student.age}</p>
+                        <p><span data-i18n="student.email">Email</span>: ${student.email || 'N/A'}</p>
+                        <p><span data-i18n="student.phone">Phone</span>: ${student.phone || 'N/A'}</p>
+                        <p><span data-i18n="student.grade">Grade</span>: ${student.grade || 'N/A'}</p>
+                    </div>
+                    <div class="student-actions">
+                        <button class="btn btn-sm btn-primary" onclick="editStudent(${student.id})" data-i18n="btn.edit">Edit</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteStudent(${student.id})" data-i18n="btn.delete">Delete</button>
+                    </div>
+                `;
+                studentList.appendChild(studentCard);
+            });
+        }
+        
+        // Add student form submission
+        document.getElementById('addStudentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const studentData = {
+                name: document.getElementById('studentName').value,
+                age: parseInt(document.getElementById('studentAge').value),
+                email: document.getElementById('studentEmail').value,
+                phone: document.getElementById('studentPhone').value,
+                grade: document.getElementById('studentGrade').value
+            };
+            
+            try {
+                await ApiHelper.post('/api/students', studentData);
+                hideAddStudentModal();
+                loadStudents();
+            } catch (error) {
+                console.error('Error adding student:', error);
+            }
+        });
+        
+        // Search functionality
+        document.getElementById('studentSearch').addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const studentCards = document.querySelectorAll('.student-card');
+            
+            studentCards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                card.style.display = text.includes(searchTerm) ? 'block' : 'none';
+            });
+        });
+        
+        // Load students on page load
+        document.addEventListener('DOMContentLoaded', loadStudents);
+    </script>
+</body>
+</html>

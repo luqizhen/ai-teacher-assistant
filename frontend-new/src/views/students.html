@@ -1,0 +1,114 @@
+<div class="students-page">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>{{ t('students.title') }}</h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <button class="btn btn-primary" ng-click="addStudent()">
+                <i class="bi bi-plus-circle"></i> {{ t('students.add') }}
+            </button>
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="input-group">
+                <input type="text" class="form-control" ng-model="searchTerm" placeholder="{{ t('students.search') }}">
+                <button class="btn btn-outline-secondary" type="button">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Students Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>{{ t('students.name') }}</th>
+                            <th>{{ t('students.age') }}</th>
+                            <th>{{ t('students.grade') }}</th>
+                            <th>{{ t('students.email') }}</th>
+                            <th>{{ t('students.phone') }}</th>
+                            <th>{{ t('common.actions') || 'Actions' }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="student in searchStudents()">
+                            <td>{{ student.name }}</td>
+                            <td>{{ student.age }}</td>
+                            <td>{{ student.grade }}</td>
+                            <td>{{ student.email }}</td>
+                            <td>{{ student.phone }}</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <button class="btn btn-sm btn-outline-primary" ng-click="editStudent(student)">
+                                        <i class="bi bi-pencil"></i> {{ t('common.edit') }}
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" ng-click="deleteStudent(student)">
+                                        <i class="bi bi-trash"></i> {{ t('common.delete') }}
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr ng-if="searchStudents().length === 0">
+                            <td colspan="6" class="text-center text-muted">
+                                {{ t('common.noResults') || 'No students found' }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Student Modal -->
+    <div class="modal fade" ng-class="{show: showAddModal}" ng-show="showAddModal" style="display: block; background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        {{ editingStudent.id ? t('students.edit') : t('students.add') }}
+                    </h5>
+                    <button type="button" class="btn-close" ng-click="cancelModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <form ng-submit="saveStudent()">
+                        <div class="mb-3">
+                            <label for="studentName" class="form-label">{{ t('students.name') }}</label>
+                            <input type="text" class="form-control" id="studentName" ng-model="editingStudent.name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="studentAge" class="form-label">{{ t('students.age') }}</label>
+                            <input type="number" class="form-control" id="studentAge" ng-model="editingStudent.age" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="studentGrade" class="form-label">{{ t('students.grade') }}</label>
+                            <input type="text" class="form-control" id="studentGrade" ng-model="editingStudent.grade">
+                        </div>
+                        <div class="mb-3">
+                            <label for="studentEmail" class="form-label">{{ t('students.email') }}</label>
+                            <input type="email" class="form-control" id="studentEmail" ng-model="editingStudent.email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="studentPhone" class="form-label">{{ t('students.phone') }}</label>
+                            <input type="tel" class="form-control" id="studentPhone" ng-model="editingStudent.phone">
+                        </div>
+                        <div class="mb-3">
+                            <label for="studentNotes" class="form-label">{{ t('students.notes') }}</label>
+                            <textarea class="form-control" id="studentNotes" ng-model="editingStudent.notes" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" ng-click="cancelModal()">{{ t('common.cancel') }}</button>
+                    <button type="button" class="btn btn-primary" ng-click="saveStudent()">{{ t('common.save') }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,76 @@
+<div class="dashboard" ng-controller="DashboardController as vm">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1>{{ t('app.welcome') }}</h1>
+            <p class="lead">{{ t('app.description') }}</p>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">{{ t('nav.students') }}</h5>
+                    <h2 class="text-primary">{{ vm.stats.totalStudents }}</h2>
+                    <p class="card-text">{{ t('students.manage') }}</p>
+                    <a href="#/students" class="btn btn-primary">{{ t('students.manage') }}</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">{{ t('nav.schedule') }}</h5>
+                    <h2 class="text-success">{{ vm.stats.todaySchedule }}</h2>
+                    <p class="card-text">{{ t('schedule.description') }}</p>
+                    <a href="#/schedule" class="btn btn-success">{{ t('schedule.view') }}</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">{{ t('nav.lessons') }}</h5>
+                    <h2 class="text-info">{{ vm.stats.upcomingLessons }}</h2>
+                    <p class="card-text">{{ t('lessons.description') }}</p>
+                    <a href="#/lessons" class="btn btn-info">{{ t('lessons.manage') }}</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">{{ t('nav.homework') }}</h5>
+                    <h2 class="text-warning">{{ vm.stats.pendingHomework }}</h2>
+                    <p class="card-text">{{ t('homework.description') }}</p>
+                    <a href="#/homework" class="btn btn-warning">{{ t('homework.manage') }}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-12">
+            <h3>{{ t('common.quickActions') }}</h3>
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="#/students" class="btn btn-outline-primary">
+                    <i class="bi bi-person-plus"></i> {{ t('students.add') }}
+                </a>
+                <a href="#/schedule" class="btn btn-outline-success">
+                    <i class="bi bi-calendar-plus"></i> {{ t('schedule.add') }}
+                </a>
+                <a href="#/lessons" class="btn btn-outline-info">
+                    <i class="bi bi-book-plus"></i> {{ t('lessons.add') }}
+                </a>
+                <a href="#/homework" class="btn btn-outline-warning">
+                    <i class="bi bi-file-plus"></i> {{ t('homework.add') }}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

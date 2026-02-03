@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="app.title">Piano Teacher Management System</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+    <style>
+    /* Language Selector Styles */
+    .language-selector {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+    }
+
+    .language-selector .dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .language-selector .dropdown-toggle {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid #dee2e6;
+        background: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .language-selector .dropdown-toggle:hover {
+        background: #f8f9fa;
+        border-color: #adb5bd;
+    }
+
+    .language-flag {
+        font-size: 16px;
+        line-height: 1;
+    }
+
+    .language-text {
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .language-selector .dropdown-menu {
+        display: none;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        min-width: 160px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        background: white;
+        margin-top: 4px;
+    }
+
+    .language-selector .dropdown-menu.show {
+        display: block;
+    }
+
+    .language-selector .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 16px;
+        transition: background-color 0.2s ease;
+        cursor: pointer;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .language-selector .dropdown-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .language-selector .dropdown-item.active {
+        background-color: #e3f2fd;
+        color: #1976d2;
+        font-weight: 500;
+    }
+
+    .language-name {
+        font-size: 14px;
+    }
+    </style>
+</head>
+<body>
+    <header id="header"></header>
+    
+    <main>
+        <div class="dashboard">
+            <h1 data-i18n="app.welcome">Welcome to Piano Teacher Management System</h1>
+            <p data-i18n="app.description">Manage your students, schedule lessons, track homework, and monitor progress.</p>
+            
+            <div class="dashboard-cards">
+                <div class="card">
+                    <h3 data-i18n="nav.students">Students</h3>
+                    <p data-i18n="student.description">Manage student information and pricing</p>
+                    <button onclick="location.href='/pages/students.html'" class="btn btn-primary" data-i18n="student.manage">Manage Students</button>
+                </div>
+                
+                <div class="card">
+                    <h3 data-i18n="nav.schedule">Schedule</h3>
+                    <p data-i18n="schedule.description">View and manage teaching schedule</p>
+                    <button onclick="location.href='/pages/schedule.html'" class="btn btn-primary" data-i18n="schedule.view">View Schedule</button>
+                </div>
+                
+                <div class="card">
+                    <h3 data-i18n="nav.lessons">Lessons</h3>
+                    <p data-i18n="lesson.description">Track lesson history and performance</p>
+                    <button onclick="location.href='/pages/lessons.html'" class="btn btn-primary" data-i18n="lesson.manage">Manage Lessons</button>
+                </div>
+                
+                <div class="card">
+                    <h3 data-i18n="nav.homework">Homework</h3>
+                    <p data-i18n="homework.description">Assign and track homework assignments</p>
+                    <button onclick="location.href='/pages/homework.html'" class="btn btn-primary" data-i18n="homework.manage">Manage Homework</button>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <div id="language-selector">
+        <!-- Language Selector Component -->
+        <div class="language-selector">
+            <div class="dropdown">
+                <button class="dropdown-toggle" type="button" id="languageDropdown" onclick="toggleDropdown()">
+                    <span class="language-flag" id="currentLanguageFlag">🇺🇸</span>
+                    <span class="language-text" id="currentLanguageText">English</span>
+                </button>
+                <ul class="dropdown-menu" id="languageDropdownMenu">
+                    <li>
+                        <a class="dropdown-item language-option" href="#" data-lang="en" onclick="selectLanguage('en')">
+                            <span class="language-flag">🇺🇸</span>
+                            <span class="language-name">English</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item language-option" href="#" data-lang="zh" onclick="selectLanguage('zh')">
+                            <span class="language-flag">🇨🇳</span>
+                            <span class="language-name">中文</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../js/main.js"></script>
+    <script>
+        // Language selector functionality - embedded directly
+        console.log('Initializing language selector');
+        
+        // Dropdown toggle function
+        function toggleDropdown() {
+            const dropdownMenu = document.getElementById('languageDropdownMenu');
+            dropdownMenu.classList.toggle('show');
+            console.log('Dropdown toggled:', dropdownMenu.classList.contains('show'));
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.querySelector('.language-selector .dropdown');
+            if (!dropdown.contains(event.target)) {
+                const dropdownMenu = document.getElementById('languageDropdownMenu');
+                dropdownMenu.classList.remove('show');
+            }
+        });
+        
+        const languageOptions = document.querySelectorAll('.language-option');
+        const currentLanguageFlag = document.getElementById('currentLanguageFlag');
+        const currentLanguageText = document.getElementById('currentLanguageText');
+        
+        console.log('Found language options:', languageOptions.length);
+        console.log('Found flag element:', currentLanguageFlag);
+        console.log('Found text element:', currentLanguageText);
+        
+        // Language configurations
+        const languages = {
+            en: {
+                flag: '🇺🇸',
+                name: 'English',
+                direction: 'ltr'
+            },
+            zh: {
+                flag: '🇨🇳',
+                name: '中文',
+                direction: 'ltr'
+            }
+        };
+        
+        // Get current language from localStorage or default to English
+        let currentLanguage = localStorage.getItem('preferredLanguage') || 'en';
+        console.log('Initial language from storage:', currentLanguage);
+        
+        // Update language selector display
+        function updateLanguageSelector(lang) {
+            const langConfig = languages[lang];
+            if (langConfig) {
+                currentLanguageFlag.textContent = langConfig.flag;
+                currentLanguageText.textContent = langConfig.name;
+                
+                // Update active state
+                languageOptions.forEach(option => {
+                    option.classList.remove('active');
+                    if (option.dataset.lang === lang) {
+                        option.classList.add('active');
+                    }
+                });
+                
+                // Update document direction
+                document.documentElement.dir = langConfig.direction;
+                document.documentElement.lang = lang;
+            }
+        }
+        
+        // Handle language selection
+        function selectLanguage(selectedLang) {
+            console.log('Language selector clicked:', selectedLang);
+            
+            // Prevent default link behavior
+            event.preventDefault();
+            
+            // Close dropdown
+            const dropdownMenu = document.getElementById('languageDropdownMenu');
+            dropdownMenu.classList.remove('show');
+            
+            // Save preference
+            localStorage.setItem('preferredLanguage', selectedLang);
+            
+            // Update selector
+            updateLanguageSelector(selectedLang);
+            
+            // Wait for language manager to be available, then call it
+            const waitForLanguageManager = () => {
+                return new Promise((resolve) => {
+                    const checkManager = () => {
+                        if (window.languageManager) {
+                            resolve(window.languageManager);
+                        } else {
+                            setTimeout(checkManager, 100);
+                        }
+                    };
+                    checkManager();
+                });
+            };
+            
+            waitForLanguageManager().then(languageManager => {
+                console.log('Calling languageManager.setLanguage with:', selectedLang);
+                return languageManager.setLanguage(selectedLang);
+            }).then(() => {
+                console.log('Language set successfully to:', selectedLang);
+            }).catch(error => {
+                console.error('Error setting language:', error);
+            });
+        }
+        
+        // Initialize selector
+        updateLanguageSelector(currentLanguage);
+        
+        console.log('Language selector initialization completed');
+    </script>
+</body>
+</html>

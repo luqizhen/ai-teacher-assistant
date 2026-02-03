@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="nav.lessons">Lessons - Piano Teacher Management System</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body>
+    <header id="header"></header>
+    
+    <main>
+        <div class="container">
+            <div class="page-header">
+                <h1 data-i18n="nav.lessons">Lessons</h1>
+                <button onclick="location.href='/'" class="btn btn-secondary" data-i18n="nav.back">Back to Dashboard</button>
+            </div>
+            
+            <div class="lesson-management">
+                <div class="lesson-list-header">
+                    <h2 data-i18n="lesson.list">Lesson History</h2>
+                    <button class="btn btn-primary" onclick="showAddLessonModal()" data-i18n="lesson.add">Add Lesson</button>
+                </div>
+                
+                <div class="filter-controls">
+                    <select id="studentFilter">
+                        <option value="">All Students</option>
+                    </select>
+                    <input type="date" id="dateFilter" placeholder="Filter by date">
+                </div>
+                
+                <div id="lessonList" class="lesson-list">
+                    <!-- Lessons will be loaded here via JavaScript -->
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <div id="language-selector"></div>
+    
+    <!-- Add Lesson Modal -->
+    <div id="addLessonModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 data-i18n="lesson.add">Add Lesson</h3>
+                <span class="close" onclick="hideAddLessonModal()">&times;</span>
+            </div>
+            <form id="addLessonForm">
+                <div class="form-group">
+                    <label for="lessonStudent" data-i18n="student.name">Student</label>
+                    <select id="lessonStudent" required>
+                        <option value="">Select a student</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="lessonDate" data-i18n="lesson.date">Date</label>
+                    <input type="datetime-local" id="lessonDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="lessonDuration" data-i18n="lesson.duration">Duration (minutes)</label>
+                    <input type="number" id="lessonDuration" required min="15" max="180" value="60">
+                </div>
+                <div class="form-group">
+                    <label for="lessonNotes" data-i18n="lesson.notes">Notes</label>
+                    <textarea id="lessonNotes" rows="4"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" data-i18n="btn.save">Save</button>
+                    <button type="button" class="btn btn-secondary" onclick="hideAddLessonModal()" data-i18n="btn.cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script src="../js/main.js"></script>
+    <script>
+        // Load language selector component
+        fetch('../components/language-selector.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('language-selector').innerHTML = html;
+            })
+            .catch(error => console.error('Error loading language selector:', error));
+            
+        // Lesson management functions
+        function showAddLessonModal() {
+            document.getElementById('addLessonModal').style.display = 'block';
+        }
+        
+        function hideAddLessonModal() {
+            document.getElementById('addLessonModal').style.display = 'none';
+            document.getElementById('addLessonForm').reset();
+        }
+        
+        // Load students for dropdown
+        async function loadStudents() {
+            try {
+                const students = await ApiHelper.get('/api/students');
+                const studentSelect = document.getElementById('lessonStudent');
+                const filterSelect = document.getElementById('studentFilter');
+                
+                students.forEach(student => {
+                    const option = new Option(student.name, student.id);
+                    studentSelect.add(option.cloneNode(true));
+                    filterSelect.add(option);
+                });
+            } catch (error) {
+                console.error('Error loading students:', error);
+            }
+        }
+        
+        // Load lessons
+        async function loadLessons() {
+            try {
+                const lessons = await ApiHelper.get('/api/lesson-content');
+                displayLessons(lessons);
+            } catch (error) {
+                console.error('Error loading lessons:', error);
+            }
+        }
+        
+        function displayLessons(lessons) {
+            const lessonList = document.getElementById('lessonList');
+            lessonList.innerHTML = '';
+            
+            lessons.forEach(lesson => {
+                const lessonCard = document.createElement('div');
+                lessonCard.className = 'lesson-card';
+                lessonCard.innerHTML = `
+                    <div class="lesson-info">
+                        <h3>${lesson.title}</h3>
+                        <p><span data-i18n="student.name">Student</span>: ${lesson.studentName || 'N/A'}</p>
+                        <p><span data-i18n="lesson.date">Date</span>: ${lesson.completionDate || 'N/A'}</p>
+                        <p><span data-i18n="lesson.duration">Duration</span>: ${lesson.estimatedDuration || 'N/A'} minutes</p>
+                        <p><span data-i18n="lesson.difficulty">Difficulty</span>: ${lesson.difficultyLevel || 'N/A'}</p>
+                        <p><span data-i18n="lesson.notes">Notes</span>: ${lesson.notes || 'N/A'}</p>
+                    </div>
+                    <div class="lesson-actions">
+                        <button class="btn btn-sm btn-primary" onclick="editLesson(${lesson.id})" data-i18n="btn.edit">Edit</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteLesson(${lesson.id})" data-i18n="btn.delete">Delete</button>
+                    </div>
+                `;
+                lessonList.appendChild(lessonCard);
+            });
+        }
+        
+        // Add lesson form submission
+        document.getElementById('addLessonForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const lessonData = {
+                studentId: parseInt(document.getElementById('lessonStudent').value),
+                title: 'Lesson',
+                description: 'Piano lesson',
+                contentType: 'LESSON',
+                difficultyLevel: 1,
+                estimatedDuration: parseInt(document.getElementById('lessonDuration').value),
+                notes: document.getElementById('lessonNotes').value,
+                completed: true,
+                completionDate: document.getElementById('lessonDate').value
+            };
+            
+            try {
+                await ApiHelper.post('/api/lesson-content', lessonData);
+                hideAddLessonModal();
+                loadLessons();
+            } catch (error) {
+                console.error('Error adding lesson:', error);
+            }
+        });
+        
+        // Filter functionality
+        document.getElementById('studentFilter').addEventListener('change', filterLessons);
+        document.getElementById('dateFilter').addEventListener('change', filterLessons);
+        
+        function filterLessons() {
+            const studentFilter = document.getElementById('studentFilter').value;
+            const dateFilter = document.getElementById('dateFilter').value;
+            const lessonCards = document.querySelectorAll('.lesson-card');
+            
+            lessonCards.forEach(card => {
+                let show = true;
+                
+                if (studentFilter && !card.textContent.includes(studentFilter)) {
+                    show = false;
+                }
+                
+                if (dateFilter && !card.textContent.includes(dateFilter)) {
+                    show = false;
+                }
+                
+                card.style.display = show ? 'block' : 'none';
+            });
+        }
+        
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStudents();
+            loadLessons();
+        });
+    </script>
+</body>
+</html>

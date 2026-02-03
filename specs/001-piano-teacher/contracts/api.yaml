@@ -1,0 +1,887 @@
+openapi: 3.0.3
+info:
+  title: Piano Teacher Management System API
+  description: RESTful API for managing piano students, lessons, schedules, and homework
+  version: 1.0.0
+  contact:
+    name: Piano Teacher System
+    email: support@pianoteacher.com
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Development server
+  - url: https://api.pianoteacher.com/v1
+    description: Production server
+
+paths:
+  /students:
+    get:
+      summary: Get all students
+      description: Retrieve a list of all students with optional filtering
+      tags:
+        - Students
+      parameters:
+        - name: name
+          in: query
+          description: Filter by student name (partial match)
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: Page number for pagination
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: Page size for pagination
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: List of students
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Student'
+                  totalElements:
+                    type: integer
+                  totalPages:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      summary: Create new student
+      description: Add a new student to the system
+      tags:
+        - Students
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateStudentRequest'
+      responses:
+        '201':
+          description: Student created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Student'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /students/{id}:
+    get:
+      summary: Get student by ID
+      description: Retrieve detailed information about a specific student
+      tags:
+        - Students
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Student ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Student details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Student'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    put:
+      summary: Update student
+      description: Update student information
+      tags:
+        - Students
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Student ID
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateStudentRequest'
+      responses:
+        '200':
+          description: Student updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Student'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    delete:
+      summary: Delete student
+      description: Remove a student from the system
+      tags:
+        - Students
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Student ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Student deleted successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /students/{id}/lessons:
+    get:
+      summary: Get student lessons
+      description: Retrieve all lessons for a specific student
+      tags:
+        - Lessons
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Student ID
+          schema:
+            type: integer
+            format: int64
+        - name: startDate
+          in: query
+          description: Filter by start date (ISO format)
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          description: Filter by end date (ISO format)
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: List of lessons
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Lesson'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /lessons:
+    get:
+      summary: Get all lessons
+      description: Retrieve lessons with optional filtering
+      tags:
+        - Lessons
+      parameters:
+        - name: startDate
+          in: query
+          description: Filter by start date (ISO format)
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          description: Filter by end date (ISO format)
+          schema:
+            type: string
+            format: date
+        - name: status
+          in: query
+          description: Filter by lesson status
+          schema:
+            $ref: '#/components/schemas/LessonStatus'
+      responses:
+        '200':
+          description: List of lessons
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Lesson'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      summary: Create new lesson
+      description: Schedule a new lesson
+      tags:
+        - Lessons
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLessonRequest'
+      responses:
+        '201':
+          description: Lesson created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lesson'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Scheduling conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /lessons/{id}:
+    get:
+      summary: Get lesson by ID
+      description: Retrieve detailed information about a specific lesson
+      tags:
+        - Lessons
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Lesson ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Lesson details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lesson'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    put:
+      summary: Update lesson
+      description: Update lesson information
+      tags:
+        - Lessons
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Lesson ID
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLessonRequest'
+      responses:
+        '200':
+          description: Lesson updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lesson'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /schedule/suggestions:
+    get:
+      summary: Get scheduling suggestions
+      description: Get available time slots for scheduling lessons
+      tags:
+        - Schedule
+      parameters:
+        - name: studentId
+          in: query
+          required: true
+          description: Student ID
+          schema:
+            type: integer
+            format: int64
+        - name: startDate
+          in: query
+          description: Start date for suggestions (ISO format)
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          description: End date for suggestions (ISO format)
+          schema:
+            type: string
+            format: date
+        - name: duration
+          in: query
+          description: Lesson duration in minutes
+          schema:
+            type: integer
+            default: 60
+      responses:
+        '200':
+          description: Available time slots
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TimeSlotSuggestion'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /homework:
+    get:
+      summary: Get homework assignments
+      description: Retrieve homework with optional filtering
+      tags:
+        - Homework
+      parameters:
+        - name: studentId
+          in: query
+          description: Filter by student ID
+          schema:
+            type: integer
+            format: int64
+        - name: status
+          in: query
+          description: Filter by homework status
+          schema:
+            $ref: '#/components/schemas/HomeworkStatus'
+        - name: dueDate
+          in: query
+          description: Filter by due date (ISO format)
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: List of homework assignments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Homework'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      summary: Create homework assignment
+      description: Assign new homework to a student
+      tags:
+        - Homework
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateHomeworkRequest'
+      responses:
+        '201':
+          description: Homework created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Homework'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /homework/{id}:
+    put:
+      summary: Update homework
+      description: Update homework assignment
+      tags:
+        - Homework
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Homework ID
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateHomeworkRequest'
+      responses:
+        '200':
+          description: Homework updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Homework'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  schemas:
+    Student:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          maxLength: 100
+          example: "张小明"
+        age:
+          type: integer
+          minimum: 5
+          maximum: 100
+          example: 12
+        grade:
+          type: string
+          maxLength: 50
+          example: "六年级"
+        email:
+          type: string
+          format: email
+          example: "student@example.com"
+        phone:
+          type: string
+          maxLength: 20
+          example: "+86-138-0013-8000"
+        notes:
+          type: string
+          maxLength: 1000
+          example: "对音乐有浓厚兴趣，练习认真"
+        pricing:
+          $ref: '#/components/schemas/Pricing'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateStudentRequest:
+      type: object
+      required:
+        - name
+        - age
+      properties:
+        name:
+          type: string
+          maxLength: 100
+          example: "张小明"
+        age:
+          type: integer
+          minimum: 5
+          maximum: 100
+          example: 12
+        grade:
+          type: string
+          maxLength: 50
+          example: "六年级"
+        email:
+          type: string
+          format: email
+          example: "student@example.com"
+        phone:
+          type: string
+          maxLength: 20
+          example: "+86-138-0013-8000"
+        notes:
+          type: string
+          maxLength: 1000
+          example: "对音乐有浓厚兴趣，练习认真"
+        pricing:
+          $ref: '#/components/schemas/CreatePricingRequest'
+
+    UpdateStudentRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+          example: "张小明"
+        age:
+          type: integer
+          minimum: 5
+          maximum: 100
+          example: 12
+        grade:
+          type: string
+          maxLength: 50
+          example: "六年级"
+        email:
+          type: string
+          format: email
+          example: "student@example.com"
+        phone:
+          type: string
+          maxLength: 20
+          example: "+86-138-0013-8000"
+        notes:
+          type: string
+          maxLength: 1000
+          example: "对音乐有浓厚兴趣，练习认真"
+
+    Pricing:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        hourlyRate:
+          type: number
+          format: decimal
+          example: 150.00
+        lessonDuration:
+          type: number
+          format: decimal
+          example: 1.0
+        paymentTerms:
+          type: string
+          maxLength: 500
+          example: "月结"
+
+    CreatePricingRequest:
+      type: object
+      required:
+        - hourlyRate
+        - lessonDuration
+      properties:
+        hourlyRate:
+          type: number
+          format: decimal
+          minimum: 0
+          example: 150.00
+        lessonDuration:
+          type: number
+          format: decimal
+          minimum: 0
+          example: 1.0
+        paymentTerms:
+          type: string
+          maxLength: 500
+          example: "月结"
+
+    Lesson:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        startTime:
+          type: string
+          format: date-time
+          example: "2025-01-30T14:00:00"
+        endTime:
+          type: string
+          format: date-time
+          example: "2025-01-30T15:00:00"
+        topics:
+          type: string
+          maxLength: 1000
+          example: "音阶练习，C大调"
+        techniques:
+          type: string
+          maxLength: 1000
+          example: "手指独立性训练"
+        materials:
+          type: string
+          maxLength: 500
+          example: "拜厄练习曲第20条"
+        notes:
+          type: string
+          maxLength: 2000
+          example: "学生进步明显，节奏感增强"
+        status:
+          $ref: '#/components/schemas/LessonStatus'
+        student:
+          $ref: '#/components/schemas/Student'
+        homework:
+          type: array
+          items:
+            $ref: '#/components/schemas/Homework'
+        performance:
+          $ref: '#/components/schemas/Performance'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateLessonRequest:
+      type: object
+      required:
+        - startTime
+        - endTime
+        - studentId
+      properties:
+        startTime:
+          type: string
+          format: date-time
+          example: "2025-01-30T14:00:00"
+        endTime:
+          type: string
+          format: date-time
+          example: "2025-01-30T15:00:00"
+        studentId:
+          type: integer
+          format: int64
+          example: 1
+
+    UpdateLessonRequest:
+      type: object
+      properties:
+        startTime:
+          type: string
+          format: date-time
+          example: "2025-01-30T14:00:00"
+        endTime:
+          type: string
+          format: date-time
+          example: "2025-01-30T15:00:00"
+        topics:
+          type: string
+          maxLength: 1000
+          example: "音阶练习，C大调"
+        techniques:
+          type: string
+          maxLength: 1000
+          example: "手指独立性训练"
+        materials:
+          type: string
+          maxLength: 500
+          example: "拜厄练习曲第20条"
+        notes:
+          type: string
+          maxLength: 2000
+          example: "学生进步明显，节奏感增强"
+        status:
+          $ref: '#/components/schemas/LessonStatus'
+
+    LessonStatus:
+      type: string
+      enum:
+        - SCHEDULED
+        - COMPLETED
+        - CANCELLED
+        - RESCHEDULED
+
+    Homework:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        description:
+          type: string
+          maxLength: 2000
+          example: "练习拜厄第20-25条，注意节奏准确性"
+        dueDate:
+          type: string
+          format: date
+          example: "2025-02-06"
+        status:
+          $ref: '#/components/schemas/HomeworkStatus'
+        completionNotes:
+          type: string
+          maxLength: 1000
+          example: "完成度良好，第23条需要加强练习"
+        lesson:
+          $ref: '#/components/schemas/Lesson'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateHomeworkRequest:
+      type: object
+      required:
+        - description
+        - dueDate
+        - lessonId
+      properties:
+        description:
+          type: string
+          maxLength: 2000
+          example: "练习拜厄第20-25条，注意节奏准确性"
+        dueDate:
+          type: string
+          format: date
+          example: "2025-02-06"
+        lessonId:
+          type: integer
+          format: int64
+          example: 1
+
+    UpdateHomeworkRequest:
+      type: object
+      properties:
+        description:
+          type: string
+          maxLength: 2000
+          example: "练习拜厄第20-25条，注意节奏准确性"
+        dueDate:
+          type: string
+          format: date
+          example: "2025-02-06"
+        status:
+          $ref: '#/components/schemas/HomeworkStatus'
+        completionNotes:
+          type: string
+          maxLength: 1000
+          example: "完成度良好，第23条需要加强练习"
+
+    HomeworkStatus:
+      type: string
+      enum:
+        - ASSIGNED
+        - IN_PROGRESS
+        - COMPLETED
+        - OVERDUE
+
+    Performance:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 10
+          example: 8
+        notes:
+          type: string
+          maxLength: 2000
+          example: "音阶演奏流畅，和弦转换需要加强"
+        improvements:
+          type: string
+          maxLength: 1000
+          example: "加强左手力度练习"
+        achievements:
+          type: string
+          maxLength: 1000
+          example: "掌握了C大调音阶"
+        evaluationDate:
+          type: string
+          format: date-time
+          example: "2025-01-30T15:00:00"
+        lesson:
+          $ref: '#/components/schemas/Lesson'
+
+    TimeSlotSuggestion:
+      type: object
+      properties:
+        startTime:
+          type: string
+          format: date-time
+          example: "2025-02-03T14:00:00"
+        endTime:
+          type: string
+          format: date-time
+          example: "2025-02-03T15:00:00"
+        confidence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          example: 0.85
+        reason:
+          type: string
+          example: "基于历史偏好时间"
+
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+
+  responses:
+    BadRequest:
+      description: Bad request - invalid input data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Unauthorized - authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+tags:
+  - name: Students
+    description: Student management operations
+  - name: Lessons
+    description: Lesson scheduling and management
+  - name: Schedule
+    description: Scheduling and availability management
+  - name: Homework
+    description: Homework assignment and tracking

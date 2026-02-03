@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - DB_PASSWORD=password
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=admin123
+    volumes:
+      - backend_data:/app/data
+    networks:
+      - piano-teacher-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - piano-teacher-network
+    restart: unless-stopped
+
+  # Optional: PostgreSQL for production use
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=piano_teacher
+      - POSTGRES_USER=piano_teacher_user
+      - POSTGRES_PASSWORD=change_me_in_production
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - piano-teacher-network
+    profiles:
+      - production
+    restart: unless-stopped
+
+volumes:
+  backend_data:
+  postgres_data:
+
+networks:
+  piano-teacher-network:
+    driver: bridge
